@@ -3,8 +3,10 @@ import os
 
 DELIMITER = [',', ';', ':', '(', ')', '{', '}', '[', ']']
 OPERATOR = ['=', '+', '-', '*', '/', '%', '^', '!', '|', '&', '<', '>']
-# Edit later if tapos na paper
+SPECIAL_CHAR = ['~', '?', '@', '$', '|', '$', '.', '#']
+# TODO: Edit later if tapos na paper
 UNIT = ['m', 'in', 'ft', 'yd', 'mi', 'm2', 'sqin', 'sqft', 'sqyd', 'sqmi', 'acre', 'hectare', 'm3', 'L', 'cc', 'teaspoon', 'tablespoon', 'rad', 'deg', 'grad', 'sec', 'min', 'hr', 'day', 'week', 'month', 'year', 'decade', 'century', 'g', 'ton', 'oz', 'lbs']
+
 
 # Main function
 def main():
@@ -32,7 +34,7 @@ def main():
         
         # Write tokens to the CSV file
         with open(outputFileName, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile, quotechar=None)
+            writer = csv.writer(csvfile, quotechar=None, escapechar=' ')
             writer.writerow(['Token Value', 'Token Type'])
             
             for token in tokens:
@@ -69,6 +71,12 @@ def lexical_analyzer(inputCode):
             index += 1
             continue
         
+        # Handle comments
+        elif char == '#':
+            token, index = handle_comments(inputCode, index, length)
+            tokens.append(token)
+            continue
+        
         # Handle quotation marks
         elif char in ["'", '"']:
             token, index = handle_quotes(inputCode, index, length)
@@ -102,11 +110,32 @@ def lexical_analyzer(inputCode):
                 previousToken = token
             continue
         
+        # # Handle words (keywords, reserved words, identifiers, or invalid identifiers)
+        # elif char.isalpha() or char == '_' or inputCode[index] in SPECIAL_CHAR:
+        #     token, index = handle_words(inputCode, index, length)
+        #     tokens.append(token)
+        #     previousToken = token
+        #     continue
+        
         # TODO: Remove this block after handling all tokens
         else:
             index += 1
         
     return tokens
+
+# Process comments
+def handle_comments(inputCode, index, length):
+    startIndex = index
+    index += 1
+    
+    while index < length and inputCode[index] != '#':
+        index += 1
+    
+    if index < length and inputCode[index] == '#':
+        index += 1
+        return {'value': inputCode[startIndex:index], 'type': 'COMMENT'}, index
+    else:
+        return {'value': inputCode[startIndex:index], 'type': 'INVALID_COMMENT'}, index
 
 # Process quotation marks   
 def handle_quotes(inputCode, index, length):
@@ -270,7 +299,9 @@ def handle_numbers(inputCode, index, length):
             if hasDot: # Invalid float
                 index += 1
                 return {'value': inputCode[numStartIndex:index], 'type': 'INVALID_NUM'}, None, index
-            if index + 1 < length and inputCode[index + 1].isdigit(): # Ensure there is a digit after the decimal point
+            
+            # Ensure there is a digit after the decimal point
+            if index + 1 < length and inputCode[index + 1].isdigit(): 
                 hasDot = True
                 index += 1
             else:
@@ -299,10 +330,22 @@ def handle_numbers(inputCode, index, length):
     else:
         return {'value': inputCode[numStartIndex:numEndIndex], 'type': 'INTEGER'}, unitToken, index
     
+# TODO: Complete the function for units
 # Handle units
 def classify_unit(inputCode):
     if inputCode in UNIT:
         return {'value': inputCode, 'type': 'UNIT'}
+    
+# def handle_words(inputCode, index, length):
+#     startIndex = index
+    
+#     while index < length and (inputCode[index].isalnum() or inputCode[index] == '_' or inputCode[index] in SPECIAL_CHAR):
+#         index += 1
+#     word = inputCode[startIndex:index]
+    
+#     # Determine the token type for word
+#     if word in KEYWORD:
+#         token = handle_keyword(word)
 
 # Run the main function
 if __name__ == '__main__':

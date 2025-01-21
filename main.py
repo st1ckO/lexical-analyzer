@@ -3,6 +3,8 @@ import os
 
 DELIMITER = [',', ';', ':', '(', ')', '{', '}', '[', ']']
 OPERATOR = ['=', '+', '-', '*', '/', '%', '^', '!', '|', '&', '<', '>']
+# Edit later if tapos na paper
+UNIT = ['m', 'in', 'ft', 'yd', 'mi', 'm2', 'sqin', 'sqft', 'sqyd', 'sqmi', 'acre', 'hectare', 'm3', 'L', 'cc', 'teaspoon', 'tablespoon', 'rad', 'deg', 'grad', 'sec', 'min', 'hr', 'day', 'week', 'month', 'year', 'decade', 'century', 'g', 'ton', 'oz', 'lbs']
 
 # Main function
 def main():
@@ -18,7 +20,7 @@ def main():
         with open(fileName, 'r') as file:
             inputCode = file.read()
             
-        # Call the lexical analyzer
+        # Perform lexical analysis
         tokens = lexical_analyzer(inputCode)
         
         # Output the tokens to a CSV file
@@ -89,6 +91,18 @@ def lexical_analyzer(inputCode):
             previousToken = token
             continue
         
+        # Handle numbers
+        elif char.isdigit() or (char == '.' and index + 1 < length and inputCode[index + 1].isdigit()):
+            token, unitToken, index = handle_numbers(inputCode, index, length)
+            tokens.append(token)
+            if unitToken:
+                tokens.append(unitToken)
+                previousToken = unitToken
+            else:
+                previousToken = token
+            continue
+        
+        # TODO: Remove this block after handling all tokens
         else:
             index += 1
         
@@ -114,6 +128,7 @@ def handle_quotes(inputCode, index, length):
                 return {'value': value, 'type': 'STRING_LITERAL'}, index
         
         if char == '\n':
+            index += 1
             break
         
         # Otherwise, add the character to the value
@@ -121,7 +136,7 @@ def handle_quotes(inputCode, index, length):
         index += 1
         
     # If the closing quote is not found, it's invalid
-    return {'value': value[startIndex:index], 'type': 'INVALID'}, index
+    return {'value': value[startIndex:index], 'type': 'INVALID_QUOTE'}, index
 
 # Process delimiters
 def handle_delimiters(inputCode, index):
@@ -241,6 +256,53 @@ def handle_operators(inputCode, index, length, previousToken):
         
     return {'value': operatorSequence, 'type': tokenType}, index
 
+# Process numbers
+def handle_numbers(inputCode, index, length):
+    numStartIndex = index
+    hasDot = False # Check if the number has a decimal point
+    
+    while index < length:
+        char = inputCode[index]
+        
+        if char.isdigit():
+            index += 1
+        elif char == '.':
+            if hasDot: # Invalid float
+                index += 1
+                return {'value': inputCode[numStartIndex:index], 'type': 'INVALID_NUM'}, None, index
+            if index + 1 < length and inputCode[index + 1].isdigit(): # Ensure there is a digit after the decimal point
+                hasDot = True
+                index += 1
+            else:
+                index += 1
+                return {'value': inputCode[numStartIndex:index], 'type': 'INVALID_NUM'}, None, index
+        else:
+            break
+    numEndIndex = index 
+    
+    # Check if the number has a unit
+    if index < length and inputCode[index].isalpha():
+        charStartIndex = index
+        
+        # Find the end of the possible unit
+        while index < length and inputCode[index] not in [' ', '\n']:
+            index += 1
+        
+        if inputCode[charStartIndex:index] in UNIT:
+            unitToken = classify_unit(inputCode[charStartIndex:index])
+        else:   # Invalid Identifier since it's not a valid unit
+            return {'value': inputCode[numStartIndex:index], 'type': 'INVALID_IDENTIFIER'}, None, index
+    
+    # Determine if the number is a float or an integer
+    if hasDot:
+        return {'value': inputCode[numStartIndex:numEndIndex], 'type': 'FLOAT'}, unitToken, index
+    else:
+        return {'value': inputCode[numStartIndex:numEndIndex], 'type': 'INTEGER'}, unitToken, index
+    
+# Handle units
+def classify_unit(inputCode):
+    if inputCode in UNIT:
+        return {'value': inputCode, 'type': 'UNIT'}
 
 # Run the main function
 if __name__ == '__main__':

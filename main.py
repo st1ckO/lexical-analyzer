@@ -1,17 +1,14 @@
-import csv
 import os
 
+CONSTANT = ['e', 'pi']
+DATA_TYPE = ['length', 'surface_area', 'volume', 'angle', 'time', 'mass']
 DELIMITER = [',', ';', ':', '(', ')', '{', '}', '[', ']']
+KEYWORD = ['let', 'range', 'print', 'input', 'for', 'if', 'else']
 OPERATOR = ['=', '+', '-', '*', '/', '%', '^', '!', '|', '&', '<', '>']
-SPECIAL_CHAR = ['~', '?', '@', '$', '|', '$', '.', '#']
-# TODO: Add functions sa marerecognize
-# TODO: Add constant values sa marerecognize
-# TODO: Add single comments
-# TODO: Edit later if tapos na paper
-UNIT = ['m', 'in', 'ft', 'yd', 'mi', 'm2', 'sqin', 'sqft', 'sqyd', 'sqmi', 'acre', 'hectare', 'm3', 'L', 'cc', 'teaspoon', 'tablespoon', 'rad', 'deg', 'grad', 'sec', 'min', 'hr', 'day', 'week', 'month', 'year', 'decade', 'century', 'g', 'ton', 'oz', 'lbs']
+RESERVED_WORD = ['null', 'true', 'false', 'import']
+SPECIAL_CHAR = ['~', '?', '@', '$', '.', '`']
+UNIT = ['m', 'meter', 'in', 'inch', 'ft', 'feet', 'yd', 'yard', 'm2', 'sqin', 'sqft', 'sqyd', 'sqmi', 'acre', 'hectare', 'm3', 'L', 'cc', 'teaspoon', 'tablespoon', 'rad', 'deg', 'degrees', 'grad', 'sec', 'seconds', 'min', 'minutes', 'hr', 'hour', 'day', 'week', 'month', 'year', 'decade', 'century', 'g', 'ton', 'oz', 'lbs']
 
-
-# Main function
 def main():
     try:
         # Prompt user for the file name
@@ -28,22 +25,24 @@ def main():
         # Perform lexical analysis
         tokens = lexical_analyzer(inputCode)
         
-        # Output the tokens to a CSV file
-        outputName = input('Enter the output file name (don\'t include file extension): ')
+        # Output the tokens to a text file
+        outputName = input("Enter the output file name (don’t include file extension): ")
         if not outputName:
-            raise ValueError('Output file name cannot be empty.')
-        
-        outputFileName = outputName + '.csv'
-        
-        # Write tokens to the CSV file
-        with open(outputFileName, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile, quotechar=None, escapechar='\\')
-            writer.writerow(['Token Value', 'Token Type'])
-            
+            raise ValueError("Output file name cannot be empty.")
+
+        outputFileName = outputName + ".txt"
+
+        # Write tokens to the text file in table format
+        with open(outputFileName, "w") as txtfile:
+            # Write table headers
+            txtfile.write(f"{'Token Value':<20} {'Token Type':<20}\n")
+            txtfile.write("=" * 40 + "\n")
+
+            # Write each token as a formatted row
             for token in tokens:
-                writer.writerow([token['value'], token['type']])
-        
-        print(f'Tokens have been written to {outputFileName}')
+                txtfile.write(f"{token['value']:<20} {token['type']:<20}\n")
+
+        print(f"Symbol table has been written to {outputFileName}")
     except ValueError as valueE:
         print(valueE)
     except FileNotFoundError as fnfE:
@@ -102,7 +101,7 @@ def lexical_analyzer(inputCode):
             previousToken = token
             continue
         
-        # Handle numbers
+        # Handle numbers and units
         elif char.isdigit() or (char == '.' and index + 1 < length and inputCode[index + 1].isdigit()):
             token, unitToken, index = handle_numbers(inputCode, index, length)
             tokens.append(token)
@@ -113,15 +112,16 @@ def lexical_analyzer(inputCode):
                 previousToken = token
             continue
         
-        # # Handle words (keywords, reserved words, identifiers, or invalid identifiers)
+        # # Handle words (keywords, reserved words, identifiers)
         # elif char.isalpha() or char == '_' or inputCode[index] in SPECIAL_CHAR:
         #     token, index = handle_words(inputCode, index, length)
         #     tokens.append(token)
         #     previousToken = token
         #     continue
         
-        # TODO: Remove this block after handling all tokens
+        # Handle unknown characters
         else:
+            print(f"Warning: Unrecognized character '{char}' at index {index}")
             index += 1
         
     return tokens
@@ -166,9 +166,9 @@ def handle_quotes(inputCode, index, length):
         
     # If the closing quote is not found, it's invalid
     if inputCode[index - 1] == '\n':
-        return {'value': inputCode[startIndex:index - 1], 'type': 'INVALID_QUOTE'}, index
+        return {'value': inputCode[startIndex:index - 1], 'type': 'INVALID_LITERAL'}, index
     else:
-        return {'value': inputCode[startIndex:index], 'type': 'INVALID_QUOTE'}, index
+        return {'value': inputCode[startIndex:index], 'type': 'INVALID_LITERAL'}, index
 
 # Process delimiters
 def handle_delimiters(inputCode, index):
@@ -259,7 +259,7 @@ def handle_operators(inputCode, index, length, previousToken):
                     tokenType = 'SUB_OP'
             elif operatorSequence == '%':
                 # Percentage operator must be right beside a number (e.g. 10%)
-                if previousToken and previousToken['type'] in ['INTEGER', 'FLOAT'] and inputCode[index - 1] != ' ':
+                if previousToken and previousToken['type'] in ['INTEGER', 'FLOAT'] and not inputCode[index - 2].isspace():
                     tokenType = 'PERCENTAGE_OP'
                 else:
                     tokenType = 'MOD_OP'
@@ -314,18 +314,20 @@ def handle_numbers(inputCode, index, length):
             break
     numEndIndex = index 
     
+    unitToken = None
+    
     # Check if the number has a unit
     if index < length and inputCode[index].isalpha():
         charStartIndex = index
         
         # Find the end of the possible unit
-        while index < length and inputCode[index] not in [' ', '\n']:
+        while index < length and not inputCode[index].isspace() and inputCode[index] not in DELIMITER:
             index += 1
         
         if inputCode[charStartIndex:index] in UNIT:
             unitToken = classify_unit(inputCode[charStartIndex:index])
         else:   # Invalid Identifier since it's not a valid unit
-            return {'value': inputCode[numStartIndex:index], 'type': 'INVALID_IDENTIFIER'}, None, index
+            return {'value': inputCode[numStartIndex:index], 'type': 'INVALID_UNIT'}, unitToken, index
     
     # Determine if the number is a float or an integer
     if hasDot:
@@ -333,11 +335,74 @@ def handle_numbers(inputCode, index, length):
     else:
         return {'value': inputCode[numStartIndex:numEndIndex], 'type': 'INTEGER'}, unitToken, index
     
-# TODO: Complete the function for units
-# Handle units
+# Classify unit type
 def classify_unit(inputCode):
-    if inputCode in UNIT:
-        return {'value': inputCode, 'type': 'UNIT'}
+    if inputCode == 'm' or inputCode == 'meter':
+        return {'value': inputCode, 'type': 'UNIT_METER'}
+    elif inputCode == 'in' or inputCode == 'inch':
+        return {'value': inputCode, 'type': 'UNIT_INCH'}
+    elif inputCode == 'ft' or inputCode == 'feet':
+        return {'value': inputCode, 'type': 'UNIT_FEET'}
+    elif inputCode == 'yd' or inputCode == 'yard':
+        return {'value': inputCode, 'type': 'UNIT_YARD'}
+    elif inputCode == 'm2':
+        return {'value': inputCode, 'type': 'UNIT_SQM'}
+    elif inputCode == 'sqin':
+        return {'value': inputCode, 'type': 'UNIT_SQIN'}
+    elif inputCode == 'sqft':
+        return {'value': inputCode, 'type': 'UNIT_SQFT'}
+    elif inputCode == 'sqyd':
+        return {'value': inputCode, 'type': 'UNIT_SQYD'}
+    elif inputCode == 'sqmi':
+        return {'value': inputCode, 'type': 'UNIT_SQMI'}
+    elif inputCode == 'acre':
+        return {'value': inputCode, 'type': 'UNIT_ACRE'}
+    elif inputCode == 'hectare':
+        return {'value': inputCode, 'type': 'UNIT_HECTARE'}
+    elif inputCode == 'm3':
+        return {'value': inputCode, 'type': 'UNIT_CBM'}
+    elif inputCode == 'L':
+        return {'value': inputCode, 'type': 'UNIT_LITER'}
+    elif inputCode == 'cc':
+        return {'value': inputCode, 'type': 'UNIT_CC'}
+    elif inputCode == 'teaspoon':
+        return {'value': inputCode, 'type': 'UNIT_TEASPOON'}
+    elif inputCode == 'tablespoon':
+        return {'value': inputCode, 'type': 'UNIT_TABLESPOON'}
+    elif inputCode == 'rad':
+        return {'value': inputCode, 'type': 'UNIT_RADIAN'}
+    elif inputCode == 'deg' or inputCode == 'degrees':
+        return {'value': inputCode, 'type': 'UNIT_DEGREE'}
+    elif inputCode == 'grad':
+        return {'value': inputCode, 'type': 'UNIT_GRADIAN'}
+    elif inputCode == 'sec' or inputCode == 'seconds':
+        return {'value': inputCode, 'type': 'UNIT_SECOND'}
+    elif inputCode == 'min' or inputCode == 'minutes':
+        return {'value': inputCode, 'type': 'UNIT_MINUTE'}
+    elif inputCode == 'hr' or inputCode == 'hour':
+        return {'value': inputCode, 'type': 'UNIT_HOUR'}
+    elif inputCode == 'day':
+        return {'value': inputCode, 'type': 'UNIT_DAY'}
+    elif inputCode == 'week':
+        return {'value': inputCode, 'type': 'UNIT_WEEK'}
+    elif inputCode == 'month':
+        return {'value': inputCode, 'type': 'UNIT_MONTH'}
+    elif inputCode == 'year':
+        return {'value': inputCode, 'type': 'UNIT_YEAR'}
+    elif inputCode == 'decade':
+        return {'value': inputCode, 'type': 'UNIT_DECADE'}
+    elif inputCode == 'century':
+        return {'value': inputCode, 'type': 'UNIT_CENTURY'}
+    elif inputCode == 'g':
+        return {'value': inputCode, 'type': 'UNIT_GRAM'}
+    elif inputCode == 'ton':
+        return {'value': inputCode, 'type': 'UNIT_TON'}
+    elif inputCode == 'oz':
+        return {'value': inputCode, 'type': 'UNIT_OUNCE'}
+    elif inputCode == 'lbs':
+        return {'value': inputCode, 'type': 'UNIT_POUND'}
+    else:
+        return {'value': inputCode, 'type': 'INVALID_UNIT'}
     
 # def handle_words(inputCode, index, length):
 #     startIndex = index

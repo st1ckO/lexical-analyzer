@@ -1,0 +1,15 @@
+Token Value          Token Type          
+========================================
+5                    INTEGER             
+%                    PERCENTAGE_OP       
+%                    MOD_OP              
+%                    MOD_OP              
+3                    INTEGER             
+%                    PERCENTAGE_OP       
+%                    MOD_OP              
+%%                   INVALID_OP          
+;                    SEMICOLON           
+5                    INTEGER             
+^                    POW_OP              
+2                    INTEGER             
+;                    SEMICOLON           

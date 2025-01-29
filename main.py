@@ -194,7 +194,6 @@ def handle_delimiters(inputCode, index):
     return {'value': char, 'type': tokenType}
 
 # Process operators
-# TODO: Revise PRECEDING_TOKENS for ambiguous operators after completing all tokens
 def handle_operators(inputCode, index, length, previousToken):
     VALID_OP = ['=', '+=', '-=', '*=', '/=', '%=', '+', '-', '*', '/', '%', '^', '++', '--', '!', '||', '&&', '==', '!=', '>', '<', '>=', '<=']
     ASSIGNMENT_OP = ['=', '+=', '-=', '*=', '/=', '%=']
@@ -241,18 +240,10 @@ def handle_operators(inputCode, index, length, previousToken):
             elif operatorSequence == '--':
                 tokenType = 'DEC_OP'
         elif operatorSequence in AMBIGUOUS_OP:
-            PRECEDING_TOKENS = ['COMMA', 'SEMICOLON', 'COLON', 'OPEN_PAREN', 'OPEN_BRACE', 'OPEN_BRACKET', 'ASSIGN_OP', 'ADD_ASSIGN_OP', 'SUB_ASSIGN_OP', 'MULT_ASSIGN_OP', 'DIV_ASSIGN_OP', 'MOD_ASSIGN_OP', 'MULT_OP', 'DIV_OP', 'POW_OP', 'ADD_OP', 'SUB_OP', 'MOD_OP', 'NOT_OP', 'OR_OP', 'AND_OP', 'EQU_OP', 'NOT_EQU_OP', 'GRT_OP', 'LST_OP', 'GRT_EQU_OP', 'LST_EQU_OP']
-            
             if operatorSequence == '+':
-                if previousToken == None or previousToken['type'] in PRECEDING_TOKENS:
-                    tokenType = 'UNARY_PLUS_OP'
-                else:
-                    tokenType = 'ADD_OP'
+                    tokenType = 'PLUS_OP'
             elif operatorSequence == '-':
-                if previousToken == None or previousToken['type'] in PRECEDING_TOKENS:
-                    tokenType = 'UNARY_MINUS_OP'
-                else:
-                    tokenType = 'SUB_OP'
+                    tokenType = 'MINUS_OP'
             elif operatorSequence == '%':
                 # Percentage operator must be right beside a number (e.g. 10%)
                 if previousToken and previousToken['type'] in ['INTEGER', 'FLOAT'] and not inputCode[index - 2].isspace():

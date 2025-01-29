@@ -1,5 +1,7 @@
-if (volume > 1 m3) {  
-    if (weight < 100 kg) {  
+import something
+# MAIN TEST
+if (objectVolume > 1 m3) {  
+    if (weight < 1000 g) {  
         print("Light object");  
     } else {  
         print("Heavy object");  
@@ -7,3 +9,10 @@ if (volume > 1 m3) {
 } else {  
     print("Small object");
 }
+
+length x = 60m;
+let y = 30 * 60%;
+let z = 60% % 30%;
+let abc = 70;
+let xyz = 54.5degrees;
+angle ang = 34 rad;

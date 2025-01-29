@@ -1,8 +1,11 @@
 Token Value          Token Type          
 ========================================
+import               RESERVED_IMPORT     
+something            IDENTIFIER          
+# MAIN TEST          COMMENT             
 if                   KEYWORD_IF          
 (                    OPEN_PAREN          
-volume               TYPE_VOLUME         
+objectVolume         IDENTIFIER          
 >                    GRT_OP              
 1                    INTEGER             
 m3                   UNIT_CBM            
@@ -12,8 +15,8 @@ if                   KEYWORD_IF
 (                    OPEN_PAREN          
 weight               IDENTIFIER          
 <                    LST_OP              
-100                  INTEGER             
-kg                   IDENTIFIER          
+1000                 INTEGER             
+g                    UNIT_GRAM           
 )                    CLOSE_PAREN         
 {                    OPEN_BRACE          
 print                KEYWORD_PRINT       
@@ -39,3 +42,43 @@ print                KEYWORD_PRINT
 )                    CLOSE_PAREN         
 ;                    SEMICOLON           
 }                    CLOSE_BRACE         
+length               TYPE_LENGTH         
+x                    IDENTIFIER          
+=                    ASSIGN_OP           
+60                   INTEGER             
+m                    UNIT_METER          
+;                    SEMICOLON           
+let                  KEYWORD_LET         
+y                    IDENTIFIER          
+=                    ASSIGN_OP           
+30                   INTEGER             
+*                    MULT_OP             
+60                   INTEGER             
+%                    PERCENTAGE_OP       
+;                    SEMICOLON           
+let                  KEYWORD_LET         
+z                    IDENTIFIER          
+=                    ASSIGN_OP           
+60                   INTEGER             
+%                    PERCENTAGE_OP       
+%                    MOD_OP              
+30                   INTEGER             
+%                    PERCENTAGE_OP       
+;                    SEMICOLON           
+let                  KEYWORD_LET         
+abc                  IDENTIFIER          
+=                    ASSIGN_OP           
+70                   INTEGER             
+;                    SEMICOLON           
+let                  KEYWORD_LET         
+xyz                  IDENTIFIER          
+=                    ASSIGN_OP           
+54.5                 FLOAT               
+degrees              UNIT_DEGREE         
+;                    SEMICOLON           
+angle                TYPE_ANGLE          
+ang                  IDENTIFIER          
+=                    ASSIGN_OP           
+34                   INTEGER             
+rad                  UNIT_RADIAN         
+;                    SEMICOLON           

@@ -1,0 +1,31 @@
+let sum;
+let x = 7;
+let circle_area = pi * x^2;
+input(foo);
+print(foo);
+print("Hello World!");
+L = 7 cm
+L += 2 in
+r_pm = (L + W) * 2
+bar = sqrt(sum) 
+
+if (area > 5000 m2) {  
+    if (elevation > 2000 m) {  
+        print("Large and high-altitude area");  
+    } else {  
+        print("Large but low-altitude area");  
+    }  
+} else {  
+    print("Small area");
+}
+
+if (distance > 5 mi) {  
+    if (elapsedTime < 2 hr) {  
+        print("Speed is fast");  
+    } else {  
+        print("Speed is average");  
+    }  
+} else {  
+    print("Distance is too short");
+}
+

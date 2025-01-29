@@ -103,13 +103,9 @@ def lexical_analyzer(inputCode):
         
         # Handle numbers and units
         elif char.isdigit() or (char == '.' and index + 1 < length and inputCode[index + 1].isdigit()):
-            token, unitToken, index = handle_numbers(inputCode, index, length)
+            token, index = handle_numbers(inputCode, index, length)
             tokens.append(token)
-            if unitToken:
-                tokens.append(unitToken)
-                previousToken = unitToken
-            else:
-                previousToken = token
+            previousToken = token
             continue
         
         # Handle words (keywords, reserved words, identifiers)
@@ -290,7 +286,7 @@ def handle_operators(inputCode, index, length, previousToken):
 
 # Process numbers
 def handle_numbers(inputCode, index, length):
-    numStartIndex = index
+    startIndex = index
     hasDot = False # Check if the number has a decimal point
     
     while index < length:
@@ -301,7 +297,7 @@ def handle_numbers(inputCode, index, length):
         elif char == '.':
             if hasDot: # Invalid float
                 index += 1
-                return {'value': inputCode[numStartIndex:index], 'type': 'INVALID_NUM'}, None, index
+                return {'value': inputCode[startIndex:index], 'type': 'INVALID_NUM'}, None, index
             
             # Ensure there is a digit after the decimal point
             if index + 1 < length and inputCode[index + 1].isdigit(): 
@@ -309,31 +305,74 @@ def handle_numbers(inputCode, index, length):
                 index += 1
             else:
                 index += 1
-                return {'value': inputCode[numStartIndex:index], 'type': 'INVALID_NUM'}, None, index
+                return {'value': inputCode[startIndex:index], 'type': 'INVALID_NUM'}, None, index
         else:
             break
-    numEndIndex = index 
-    
-    unitToken = None
-    
-    # Check if the number has a unit
-    if index < length and inputCode[index].isalpha():
-        charStartIndex = index
-        
-        # Find the end of the possible unit
-        while index < length and not inputCode[index].isspace() and inputCode[index] not in DELIMITER:
-            index += 1
-        
-        if inputCode[charStartIndex:index] in UNIT:
-            unitToken = classify_unit(inputCode[charStartIndex:index])
-        else:   # Invalid Identifier since it's not a valid unit
-            return {'value': inputCode[numStartIndex:index], 'type': 'INVALID_UNIT'}, unitToken, index
     
     # Determine if the number is a float or an integer
     if hasDot:
-        return {'value': inputCode[numStartIndex:numEndIndex], 'type': 'FLOAT'}, unitToken, index
+        return {'value': inputCode[startIndex:index], 'type': 'FLOAT'}, index
     else:
-        return {'value': inputCode[numStartIndex:numEndIndex], 'type': 'INTEGER'}, unitToken, index
+        return {'value': inputCode[startIndex:index], 'type': 'INTEGER'}, index
+    
+def handle_words(inputCode, index, length):
+    startIndex = index
+    
+    while index < length and (inputCode[index].isalnum() or inputCode[index] == '_' or inputCode[index] in SPECIAL_CHAR):
+        index += 1
+    word = inputCode[startIndex:index]
+    
+    # Determine the token type for word
+    if word in CONSTANT:
+        if word == 'e':
+            return {'value': word, 'type': 'CONST_E'}, index
+        elif word == 'pi':
+            return {'value': word, 'type': 'CONST_PI'}, index
+    elif word in DATA_TYPE:
+        if word == 'length':
+            return {'value': word, 'type': 'TYPE_LENGTH'}, index
+        elif word == 'surface_area':
+            return {'value': word, 'type': 'TYPE_SURFACE_AREA'}, index
+        elif word == 'volume':
+            return {'value': word, 'type': 'TYPE_VOLUME'}, index
+        elif word == 'angle':
+            return {'value': word, 'type': 'TYPE_ANGLE'}, index
+        elif word == 'time':
+            return {'value': word, 'type': 'TYPE_TIME'}, index
+        elif word == 'mass':
+            return {'value': word, 'type': 'TYPE_MASS'}, index
+    elif word in KEYWORD:
+        if word == 'let':
+            return {'value': word, 'type': 'KEYWORD_LET'}, index
+        elif word == 'range':
+            return {'value': word, 'type': 'KEYWORD_RANGE'}, index
+        elif word == 'print':
+            return {'value': word, 'type': 'KEYWORD_PRINT'}, index
+        elif word == 'input':
+            return {'value': word, 'type': 'KEYWORD_INPUT'}, index
+        elif word == 'for':
+            return {'value': word, 'type': 'KEYWORD_FOR'}, index
+        elif word == 'if':
+            return {'value': word, 'type': 'KEYWORD_IF'}, index
+        elif word == 'else':
+            return {'value': word, 'type': 'KEYWORD_ELSE'}, index
+    elif word in RESERVED_WORD:
+        if word == 'null':
+            return {'value': word, 'type': 'RESERVED_NULL'}, index
+        elif word == 'true':
+            return {'value': word, 'type': 'RESERVED_TRUE'}, index
+        elif word == 'false':
+            return {'value': word, 'type': 'RESERVED_FALSE'}, index
+        elif word == 'import':
+            return {'value': word, 'type': 'RESERVED_IMPORT'}, index
+    elif word in UNIT:
+        return classify_unit(word), index
+    elif word.startswith('_') or word[0].isdigit() or word[0].isupper():
+        return {'value': word, 'type': 'INVALID_IDENTIFIER'}, index
+    elif any(char in word for char in SPECIAL_CHAR):
+        return {'value': word, 'type': 'INVALID_IDENTIFIER'}, index
+    else:
+        return {'value': word, 'type': 'IDENTIFIER'}, index
     
 # Classify unit type
 def classify_unit(inputCode):
@@ -403,63 +442,6 @@ def classify_unit(inputCode):
         return {'value': inputCode, 'type': 'UNIT_POUND'}
     else:
         return {'value': inputCode, 'type': 'INVALID_UNIT'}
-    
-def handle_words(inputCode, index, length):
-    startIndex = index
-    
-    while index < length and (inputCode[index].isalnum() or inputCode[index] == '_' or inputCode[index] in SPECIAL_CHAR):
-        index += 1
-    word = inputCode[startIndex:index]
-    
-    # Determine the token type for word
-    if word in CONSTANT:
-        if word == 'e':
-            return {'value': word, 'type': 'CONST_E'}, index
-        elif word == 'pi':
-            return {'value': word, 'type': 'CONST_PI'}, index
-    elif word in DATA_TYPE:
-        if word == 'length':
-            return {'value': word, 'type': 'TYPE_LENGTH'}, index
-        elif word == 'surface_area':
-            return {'value': word, 'type': 'TYPE_SURFACE_AREA'}, index
-        elif word == 'volume':
-            return {'value': word, 'type': 'TYPE_VOLUME'}, index
-        elif word == 'angle':
-            return {'value': word, 'type': 'TYPE_ANGLE'}, index
-        elif word == 'time':
-            return {'value': word, 'type': 'TYPE_TIME'}, index
-        elif word == 'mass':
-            return {'value': word, 'type': 'TYPE_MASS'}, index
-    elif word in KEYWORD:
-        if word == 'let':
-            return {'value': word, 'type': 'KEYWORD_LET'}, index
-        elif word == 'range':
-            return {'value': word, 'type': 'KEYWORD_RANGE'}, index
-        elif word == 'print':
-            return {'value': word, 'type': 'KEYWORD_PRINT'}, index
-        elif word == 'input':
-            return {'value': word, 'type': 'KEYWORD_INPUT'}, index
-        elif word == 'for':
-            return {'value': word, 'type': 'KEYWORD_FOR'}, index
-        elif word == 'if':
-            return {'value': word, 'type': 'KEYWORD_IF'}, index
-        elif word == 'else':
-            return {'value': word, 'type': 'KEYWORD_ELSE'}, index
-    elif word in RESERVED_WORD:
-        if word == 'null':
-            return {'value': word, 'type': 'RESERVED_NULL'}, index
-        elif word == 'true':
-            return {'value': word, 'type': 'RESERVED_TRUE'}, index
-        elif word == 'false':
-            return {'value': word, 'type': 'RESERVED_FALSE'}, index
-        elif word == 'import':
-            return {'value': word, 'type': 'RESERVED_IMPORT'}, index
-    elif word.startswith('_') or word[0].isdigit() or word[0].isupper():
-        return {'value': word, 'type': 'INVALID_IDENTIFIER'}, index
-    elif any(char in word for char in SPECIAL_CHAR):
-        return {'value': word, 'type': 'INVALID_IDENTIFIER'}, index
-    else:
-        return {'value': word, 'type': 'IDENTIFIER'}, index
 
 # Run the main function
 if __name__ == '__main__':

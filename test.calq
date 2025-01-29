@@ -1,10 +1,9 @@
-if (area > 5000 m2) {  
-    if (elevation > 2000 m) {  
-        print("Large and high-altitude area");  
+if (volume > 1 m3) {  
+    if (weight < 100 kg) {  
+        print("Light object");  
     } else {  
-        print("Large but low-altitude area");  
+        print("Heavy object");  
     }  
 } else {  
-    print("Small area");
+    print("Small object");
 }
--

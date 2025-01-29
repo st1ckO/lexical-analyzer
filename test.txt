@@ -2,23 +2,23 @@ Token Value          Token Type
 ========================================
 if                   KEYWORD_IF          
 (                    OPEN_PAREN          
-area                 IDENTIFIER          
+volume               TYPE_VOLUME         
 >                    GRT_OP              
-5000                 INTEGER             
-m2                   IDENTIFIER          
+1                    INTEGER             
+m3                   UNIT_CBM            
 )                    CLOSE_PAREN         
 {                    OPEN_BRACE          
 if                   KEYWORD_IF          
 (                    OPEN_PAREN          
-elevation            IDENTIFIER          
->                    GRT_OP              
-2000                 INTEGER             
-m                    IDENTIFIER          
+weight               IDENTIFIER          
+<                    LST_OP              
+100                  INTEGER             
+kg                   IDENTIFIER          
 )                    CLOSE_PAREN         
 {                    OPEN_BRACE          
 print                KEYWORD_PRINT       
 (                    OPEN_PAREN          
-"Large and high-altitude area" STRING_LITERAL      
+"Light object"       STRING_LITERAL      
 )                    CLOSE_PAREN         
 ;                    SEMICOLON           
 }                    CLOSE_BRACE         
@@ -26,7 +26,7 @@ else                 KEYWORD_ELSE
 {                    OPEN_BRACE          
 print                KEYWORD_PRINT       
 (                    OPEN_PAREN          
-"Large but low-altitude area" STRING_LITERAL      
+"Heavy object"       STRING_LITERAL      
 )                    CLOSE_PAREN         
 ;                    SEMICOLON           
 }                    CLOSE_BRACE         
@@ -35,8 +35,7 @@ else                 KEYWORD_ELSE
 {                    OPEN_BRACE          
 print                KEYWORD_PRINT       
 (                    OPEN_PAREN          
-"Small area"         STRING_LITERAL      
+"Small object"       STRING_LITERAL      
 )                    CLOSE_PAREN         
 ;                    SEMICOLON           
 }                    CLOSE_BRACE         
--                    SUB_OP              

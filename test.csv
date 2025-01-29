@@ -1,5 +1,4 @@
-Token  Value,Token  Type
-#  is  this  a  comment 
-#,COMMENT
-#  yepp  #,COMMENT
-#  nop,INVALID_COMMENT
+Token Value,Token Type
+#th,COMMENT
+(,OPEN_PAREN
+),CLOSE_PAREN

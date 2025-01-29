@@ -4,6 +4,9 @@ import os
 DELIMITER = [',', ';', ':', '(', ')', '{', '}', '[', ']']
 OPERATOR = ['=', '+', '-', '*', '/', '%', '^', '!', '|', '&', '<', '>']
 SPECIAL_CHAR = ['~', '?', '@', '$', '|', '$', '.', '#']
+# TODO: Add functions sa marerecognize
+# TODO: Add constant values sa marerecognize
+# TODO: Add single comments
 # TODO: Edit later if tapos na paper
 UNIT = ['m', 'in', 'ft', 'yd', 'mi', 'm2', 'sqin', 'sqft', 'sqyd', 'sqmi', 'acre', 'hectare', 'm3', 'L', 'cc', 'teaspoon', 'tablespoon', 'rad', 'deg', 'grad', 'sec', 'min', 'hr', 'day', 'week', 'month', 'year', 'decade', 'century', 'g', 'ton', 'oz', 'lbs']
 
@@ -34,7 +37,7 @@ def main():
         
         # Write tokens to the CSV file
         with open(outputFileName, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile, quotechar=None, escapechar=' ')
+            writer = csv.writer(csvfile, quotechar=None, escapechar='\\')
             writer.writerow(['Token Value', 'Token Type'])
             
             for token in tokens:
@@ -50,7 +53,7 @@ def main():
 
 # Check if the file has a .calc extension
 def validate_file_extension(fileName):
-    if not fileName.endswith('.calc'):
+    if not fileName.endswith('.calq'):
         raise ValueError(f'Invalid file extension: "{fileName}". Only .calc files are allowed.')
     if not os.path.isfile(fileName):
         raise FileNotFoundError(f'File not found: {fileName}')
@@ -128,14 +131,11 @@ def handle_comments(inputCode, index, length):
     startIndex = index
     index += 1
     
-    while index < length and inputCode[index] != '#':
+    while index < length and inputCode[index] != '\n':
         index += 1
     
-    if index < length and inputCode[index] == '#':
-        index += 1
-        return {'value': inputCode[startIndex:index], 'type': 'COMMENT'}, index
-    else:
-        return {'value': inputCode[startIndex:index], 'type': 'INVALID_COMMENT'}, index
+    return {'value': inputCode[startIndex:index], 'type': 'COMMENT'}, index
+
 
 # Process quotation marks   
 def handle_quotes(inputCode, index, length):
@@ -165,7 +165,10 @@ def handle_quotes(inputCode, index, length):
         index += 1
         
     # If the closing quote is not found, it's invalid
-    return {'value': value[startIndex:index], 'type': 'INVALID_QUOTE'}, index
+    if inputCode[index - 1] == '\n':
+        return {'value': inputCode[startIndex:index - 1], 'type': 'INVALID_QUOTE'}, index
+    else:
+        return {'value': inputCode[startIndex:index], 'type': 'INVALID_QUOTE'}, index
 
 # Process delimiters
 def handle_delimiters(inputCode, index):

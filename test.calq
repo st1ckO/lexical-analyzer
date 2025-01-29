@@ -1,2 +1,10 @@
-5% % % 3% % %% ;
-5 ^2;
+if (area > 5000 m2) {  
+    if (elevation > 2000 m) {  
+        print("Large and high-altitude area");  
+    } else {  
+        print("Large but low-altitude area");  
+    }  
+} else {  
+    print("Small area");
+}
+-

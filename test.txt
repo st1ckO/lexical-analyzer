@@ -1,15 +1,42 @@
 Token Value          Token Type          
 ========================================
-5                    INTEGER             
-%                    PERCENTAGE_OP       
-%                    MOD_OP              
-%                    MOD_OP              
-3                    INTEGER             
-%                    PERCENTAGE_OP       
-%                    MOD_OP              
-%%                   INVALID_OP          
+if                   KEYWORD_IF          
+(                    OPEN_PAREN          
+area                 IDENTIFIER          
+>                    GRT_OP              
+5000                 INTEGER             
+m2                   IDENTIFIER          
+)                    CLOSE_PAREN         
+{                    OPEN_BRACE          
+if                   KEYWORD_IF          
+(                    OPEN_PAREN          
+elevation            IDENTIFIER          
+>                    GRT_OP              
+2000                 INTEGER             
+m                    IDENTIFIER          
+)                    CLOSE_PAREN         
+{                    OPEN_BRACE          
+print                KEYWORD_PRINT       
+(                    OPEN_PAREN          
+"Large and high-altitude area" STRING_LITERAL      
+)                    CLOSE_PAREN         
 ;                    SEMICOLON           
-5                    INTEGER             
-^                    POW_OP              
-2                    INTEGER             
+}                    CLOSE_BRACE         
+else                 KEYWORD_ELSE        
+{                    OPEN_BRACE          
+print                KEYWORD_PRINT       
+(                    OPEN_PAREN          
+"Large but low-altitude area" STRING_LITERAL      
+)                    CLOSE_PAREN         
 ;                    SEMICOLON           
+}                    CLOSE_BRACE         
+}                    CLOSE_BRACE         
+else                 KEYWORD_ELSE        
+{                    OPEN_BRACE          
+print                KEYWORD_PRINT       
+(                    OPEN_PAREN          
+"Small area"         STRING_LITERAL      
+)                    CLOSE_PAREN         
+;                    SEMICOLON           
+}                    CLOSE_BRACE         
+-                    SUB_OP              

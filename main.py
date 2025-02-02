@@ -278,7 +278,12 @@ def handle_operators(inputCode, index, length, previousToken):
 # Process numbers
 def handle_numbers(inputCode, index, length):
     startIndex = index
-    hasDot = False # Check if the number has a decimal point
+    
+    # Check if the number has a decimal point
+    if inputCode[index] == '.':
+        hasDot = True
+    else:
+        hasDot = False
     
     while index < length:
         char = inputCode[index]
